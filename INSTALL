@@ -1,0 +1,53 @@
+
+Install the required Perl modules,
+
+On Debian/Ubuntu:
+
+apt-get install libhtml-template-perl libmime-lite-perl
+
+If you have a MySQL db:
+apt-get install libdbd-mysql-perl
+
+If you have a PostgreSQL db:
+apt-get install libdbd-pg-perl
+
+install the program and configuration files
+
+cp send_bacula_backup_report.pl /etc/bacula/scripts/
+cp send_bacula_backup_report.conf.example /etc/bacula/send_bacula_backup_report.conf
+cp send_bacula_backup_report.tpl /etc/bacula/
+chmod 750 /etc/bacula/scripts/send_bacula_backup_report.pl
+chmod 640 /etc/bacula/send_bacula_backup_report.conf
+
+Modify the configuration file:
+
+/etc/bacula/send_bacula_backup_report.conf
+
+You will surely need to modify the content of that variables:
+
+db_type,
+db_password,
+bweb_path,
+email_from,
+email_to
+
+You can define as many "$minimum_size" rules as you want, but this is optional.
+
+Only if you use PostgreSQL Catalog:
+
+# su posgres "psql bacula < /path/to/send_bacula_backup_report-src/functions-postgresql.sql"
+
+Try if it works correct:
+
+# /etc/bacula/scripts/send_bacula_backup_report.pl 1
+
+then check you email
+
+Enable daily email report via crontab, add the following lines to /etc/crontab:
+
+---
+# send daily bacula backup report
+0 8    * * 1-5 root    /etc/bacula/scripts/send_bacula_backup_report.pl 1 >/dev/null
+0 9    * * 1   root    /etc/bacula/scripts/send_bacula_backup_report.pl 3 >/dev/null
+---
+viene inviato un report lun-ven alle 8:00, solo il lunedi alle 9:00 un riepilogo settimanale
